@@ -1,18 +1,15 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { SessionProvider } from '@/services/SessionProvider';
-import { AppNavigation } from '@/navigation/AppNavigation';
 import { I18nProvider } from '@/i18n/I18nProvider';
 
-export default function App() {
+export function AppProviders({ children }: PropsWithChildren) {
   return (
     <SafeAreaProvider>
       <SessionProvider>
         <ThemeProvider>
-          <I18nProvider>
-            <AppNavigation />
-          </I18nProvider>
+          <I18nProvider>{children}</I18nProvider>
         </ThemeProvider>
       </SessionProvider>
     </SafeAreaProvider>
