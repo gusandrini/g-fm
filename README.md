@@ -21,7 +21,7 @@ Inclui estrutura modular, suporte a tema claro/escuro, internacionalização, na
 
 ### 🏗️ Criar novo projeto
 ```bash
-npx create-expo-app@latest nome-do-projeto
+npx create-expo-app@latest nome-do-projeto --template
 ```
 
 ### 📦 Instalar dependências
