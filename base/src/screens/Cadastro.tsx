@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -10,36 +9,39 @@ import {
   View,
   Modal,
   ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
-import { FuncionarioCad } from "../models/funcionarioCad";
-import { addFuncionario } from "../api/funcionario";
-import { useTheme } from "../context/ThemeContext";
-import { useI18n } from "@/i18n/I18nProvider";
+import { useTheme } from '@/context/ThemeContext';
+import { useI18n } from '@/i18n/I18nProvider';
+
+import { FuncionarioCad } from '@/models/funcionarioCad';
+import { addFuncionario } from '@/api/funcionario';
+
+import { styles } from '@/styles/screens/Cadastro';
 
 export default function CadastroFuncionario({ navigation }: any) {
   const { theme } = useTheme();
   const { t } = useI18n();
 
-  const [nome, setNome] = useState("");
-  const [emailCorporativo, setEmailCorporativo] = useState("");
-  const [senha, setSenha] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [idFilial, setIdFilial] = useState("");
+  const [nome, setNome] = useState('');
+  const [emailCorporativo, setEmailCorporativo] = useState('');
+  const [senha, setSenha] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [idFilial, setIdFilial] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validarEmail = (value: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const validarEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSave = async () => {
     if (!nome || !emailCorporativo || !senha || !cargo) {
-      Alert.alert(t("employeeForm.alerts.errorTitle"), t("employeeForm.alerts.required"));
+      Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.required'));
       return;
     }
     if (!validarEmail(emailCorporativo)) {
-      Alert.alert(t("employeeForm.alerts.errorTitle"), t("employeeForm.alerts.invalidEmail"));
+      Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.invalidEmail'));
       return;
     }
 
@@ -55,29 +57,29 @@ export default function CadastroFuncionario({ navigation }: any) {
     try {
       setLoading(true);
       await addFuncionario(payload);
-      Alert.alert(t("employeeForm.alerts.successTitle"), t("employeeForm.alerts.created"), [
-        { text: t("common.ok"), onPress: () => navigation.replace("Login") },
+      Alert.alert(t('employeeForm.alerts.successTitle'), t('employeeForm.alerts.created'), [
+        { text: t('common.ok'), onPress: () => navigation.replace('Login') },
       ]);
-      setNome("");
-      setEmailCorporativo("");
-      setSenha("");
-      setCargo("");
-      setIdFilial("");
+      setNome('');
+      setEmailCorporativo('');
+      setSenha('');
+      setCargo('');
+      setIdFilial('');
     } catch (error: any) {
-      if (error.response) {
+      if (error?.response) {
         if (error.response.status === 401) {
-          Alert.alert(t("employeeForm.alerts.unauthorizedTitle"), t("employeeForm.alerts.unauthorizedMsg"));
+          Alert.alert(t('employeeForm.alerts.unauthorizedTitle'), t('employeeForm.alerts.unauthorizedMsg'));
         } else if (error.response.status === 403) {
-          Alert.alert(t("employeeForm.alerts.forbiddenTitle"), t("employeeForm.alerts.forbiddenMsg"));
+          Alert.alert(t('employeeForm.alerts.forbiddenTitle'), t('employeeForm.alerts.forbiddenMsg'));
         } else {
           const msg =
             error.response.data?.message ||
             error.response.data?.error ||
-            t("employeeForm.alerts.unknownServerError");
-          Alert.alert(`${t("employeeForm.alerts.errorCode")} ${error.response.status}`, msg);
+            t('employeeForm.alerts.unknownServerError');
+          Alert.alert(`${t('employeeForm.alerts.errorCode')} ${error.response.status}`, msg);
         }
       } else {
-        Alert.alert(t("employeeForm.alerts.errorTitle"), t("employeeForm.alerts.cannotConnect"));
+        Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.cannotConnect'));
       }
     } finally {
       setLoading(false);
@@ -85,116 +87,116 @@ export default function CadastroFuncionario({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Overlay de carregamento */}
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* overlay de carregamento */}
       <Modal transparent visible={loading}>
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={theme.primary} />
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            {t("employeeForm.loading")}
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            {t('employeeForm.loading')}
           </Text>
         </View>
       </Modal>
 
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color={theme.text} />
-        <Text style={[styles.backText, { color: theme.text }]}>{t("common.back")}</Text>
-      </TouchableOpacity>
-
       <KeyboardAvoidingView
-        style={styles.inner}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
-        <Text style={[styles.label, { color: theme.text }]}>{t("employeeForm.labels.name")}</Text>
-        <TextInput
-          style={[styles.input, { borderColor: theme.primary, color: theme.text }]}
-          value={nome}
-          onChangeText={setNome}
-          placeholder={t("employeeForm.placeholders.name")}
-          placeholderTextColor={theme.text}
-        />
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          {/* Nome */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t('employeeForm.labels.name')}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+            ]}
+            value={nome}
+            onChangeText={setNome}
+            placeholder={t('employeeForm.placeholders.name')}
+            placeholderTextColor={theme.colors.mutedText}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>
-          {t("employeeForm.labels.corpEmail")}
-        </Text>
-        <TextInput
-          style={[styles.input, { borderColor: theme.primary, color: theme.text }]}
-          value={emailCorporativo}
-          onChangeText={setEmailCorporativo}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholder={t("employeeForm.placeholders.corpEmail")}
-          placeholderTextColor={theme.text}
-        />
+          {/* Email corporativo */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t('employeeForm.labels.corpEmail')}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+            ]}
+            value={emailCorporativo}
+            onChangeText={setEmailCorporativo}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholder={t('employeeForm.placeholders.corpEmail')}
+            placeholderTextColor={theme.colors.mutedText}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>{t("employeeForm.labels.password")}</Text>
-        <TextInput
-          style={[styles.input, { borderColor: theme.primary, color: theme.text }]}
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-          placeholder={t("employeeForm.placeholders.password")}
-          placeholderTextColor={theme.text}
-        />
+          {/* Senha */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t('employeeForm.labels.password')}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+            ]}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+            placeholder={t('employeeForm.placeholders.password')}
+            placeholderTextColor={theme.colors.mutedText}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>{t("employeeForm.labels.role")}</Text>
-        <TextInput
-          style={[styles.input, { borderColor: theme.primary, color: theme.text }]}
-          value={cargo}
-          onChangeText={setCargo}
-          placeholder={t("employeeForm.placeholders.role")}
-          placeholderTextColor={theme.text}
-        />
+          {/* Cargo */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t('employeeForm.labels.role')}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+            ]}
+            value={cargo}
+            onChangeText={setCargo}
+            placeholder={t('employeeForm.placeholders.role')}
+            placeholderTextColor={theme.colors.mutedText}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>
-          {t("employeeForm.labels.branchIdOptional")}
-        </Text>
-        <TextInput
-          style={[styles.input, { borderColor: theme.primary, color: theme.text }]}
-          value={idFilial}
-          onChangeText={setIdFilial}
-          keyboardType="numeric"
-          placeholder={t("employeeForm.placeholders.branchId")}
-          placeholderTextColor={theme.text}
-        />
+          {/* Id Filial (opcional) */}
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            {t('employeeForm.labels.branchIdOptional')}
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+            ]}
+            value={idFilial}
+            onChangeText={setIdFilial}
+            keyboardType="numeric"
+            placeholder={t('employeeForm.placeholders.branchId')}
+            placeholderTextColor={theme.colors.mutedText}
+          />
 
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: theme.primary }]}
-          onPress={handleSave}
-          disabled={loading}
-        >
-          <Ionicons name="save" size={20} color="#fff" />
-          <Text style={styles.buttonText}>{t("employeeForm.actions.saveEmployee")}</Text>
-        </TouchableOpacity>
+          {/* Botão salvar */}
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+            onPress={handleSave}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="save" size={20} color={theme.colors.primaryText} />
+            <Text style={[styles.buttonText, { color: theme.colors.primaryText }]}>
+              {t('employeeForm.actions.saveEmployee')}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  inner: { flex: 1, justifyContent: "center" },
-  label: { marginTop: 12, fontSize: 16 },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 4,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-    padding: 12,
-    borderRadius: 8,
-  },
-  buttonText: { color: "#fff", fontWeight: "bold", marginLeft: 8 },
-  backButton: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  backText: { fontSize: 16, marginLeft: 6 },
-  loadingOverlay: {
-    flex: 1, backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center", alignItems: "center",
-  },
-  loadingText: { marginTop: 12, fontSize: 16, fontWeight: "600" },
-});

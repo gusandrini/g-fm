@@ -1,20 +1,26 @@
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider } from '@/context/ThemeContext';
-import { SessionProvider } from '@/services/SessionProvider';
+import { StatusBar } from 'react-native';
+import { AppProviders } from '@/providers/AppProviders';
 import { AppNavigation } from '@/navigation/AppNavigation';
-import { I18nProvider } from '@/i18n/I18nProvider';
+import { useTheme } from '@/context/ThemeContext';
+
+function Root() {
+  const { theme, isDark } = useTheme();
+  return (
+    <>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.surface}
+      />
+      <AppNavigation />
+    </>
+  );
+}
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <SessionProvider>
-        <ThemeProvider>
-          <I18nProvider>
-            <AppNavigation />
-          </I18nProvider>
-        </ThemeProvider>
-      </SessionProvider>
-    </SafeAreaProvider>
+    <AppProviders>
+      <Root />
+    </AppProviders>
   );
 }
