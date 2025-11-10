@@ -6,17 +6,26 @@ import { Ionicons } from '@expo/vector-icons';
 import Home from '@/screens/Home';
 import SobreNos from '@/screens/SobreNos';
 import Cadastro from '@/screens/Cadastro';
+import OngList from '@/screens/OngList';
 
 // Header personalizado
 import { Header } from '@/components/Header';
 
 const Tab = createBottomTabNavigator();
 
+// Mapeamento de nomes de rotas para títulos
+const routeTitleMap: Record<string, string> = {
+  Home: 'Home',
+  OngList: 'ONGs',
+  SobreNos: 'Sobre Nós',
+  Cadastro: 'Perfil',
+};
+
 export function RootTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        header: () => <Header title={route.name} />, // Header global
+        header: () => <Header title={routeTitleMap[route.name] || route.name} />, // Header global
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#E5E7EB',
@@ -29,11 +38,13 @@ export function RootTabs() {
           let icon: keyof typeof Ionicons.glyphMap = 'home-outline';
           if (route.name === 'SobreNos') icon = 'information-circle-outline';
           if (route.name === 'Cadastro') icon = 'person-outline';
+          if (route.name === 'OngList') icon = 'business-outline';
           return <Ionicons name={icon} color={color} size={size} />;
         },
       })}
     >
       <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="OngList" component={OngList} options={{ title: 'ONGs' }} />
       <Tab.Screen name="SobreNos" component={SobreNos} options={{ title: 'Sobre Nós' }} />
       <Tab.Screen name="Cadastro" component={Cadastro} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
