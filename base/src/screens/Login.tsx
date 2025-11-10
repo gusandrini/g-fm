@@ -13,16 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
 import { useSession } from '@/services/SessionProvider';
-import { useTheme } from '@/context/ThemeContext';
-import { scheduleLoginNotification } from '@/Notificacao';
-import { useI18n } from '@/i18n/I18nProvider';
-
 import { styles } from '@/styles/screens/Login';
 
 export default function Login({ navigation }: any) {
   const { login } = useSession();
-  const { theme, isDark, toggleTheme } = useTheme();
-  const { t, locale, setLocale } = useI18n();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +24,7 @@ export default function Login({ navigation }: any) {
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
-      Alert.alert(t('login.alerts.warningTitle'), t('login.alerts.fillFields'));
+      Alert.alert('Atenção', 'Preencha todos os campos');
       return;
     }
 
@@ -39,53 +33,47 @@ export default function Login({ navigation }: any) {
       const ok = await login(email, password);
 
       if (!ok) {
-        Alert.alert(t('login.alerts.invalidTitle'), t('login.alerts.invalidMessage'));
+        Alert.alert('Erro', 'Email ou senha inválidos');
         return;
       }
 
-      scheduleLoginNotification();
       navigation.replace('Home');
     } catch (err: any) {
       console.error('Erro no login:', err);
 
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
-          Alert.alert(t('login.alerts.invalidTitle'), t('login.alerts.invalidMessage'));
+          Alert.alert('Erro', 'Email ou senha inválidos');
         } else if (err.response?.status === 500) {
-          Alert.alert(t('login.alerts.serverErrorTitle'), t('login.alerts.serverErrorMessage'));
+          Alert.alert('Erro no Servidor', 'Erro interno do servidor. Tente novamente mais tarde.');
         } else {
-          Alert.alert(t('login.alerts.errorTitle'), t('login.alerts.connectionError'));
+          Alert.alert('Erro', 'Erro de conexão. Verifique sua internet.');
         }
       } else {
-        Alert.alert(t('login.alerts.errorTitle'), t('login.alerts.unexpectedError'));
+        Alert.alert('Erro', 'Erro inesperado. Tente novamente.');
       }
     } finally {
       setLoading(false);
     }
   }
 
-  function toggleLanguage() {
-    const nextLocale = locale === 'pt-BR' ? 'es-ES' : 'pt-BR';
-    setLocale(nextLocale);
-  }
-
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#F7F8FA' }]}>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.primary }]}>{t('login.title')}</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.text }]}>{t('login.subtitle')}</Text>
+        <Text style={[styles.title, { color: '#22C55E' }]}>Login</Text>
+        <Text style={[styles.subtitle, { color: '#0B1220' }]}>Entre com suas credenciais</Text>
 
         <View
           style={[
             styles.inputContainer,
-            { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+            { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' },
           ]}
         >
-          <Ionicons name="mail-outline" size={20} color={theme.colors.primary} style={styles.icon} />
+          <Ionicons name="mail-outline" size={20} color="#22C55E" style={styles.icon} />
           <TextInput
-            style={[styles.input, { color: theme.colors.text }]}
-            placeholder={t('login.placeholders.email')}
-            placeholderTextColor={theme.colors.mutedText}
+            style={[styles.input, { color: '#0B1220' }]}
+            placeholder="Email"
+            placeholderTextColor="#6B7280"
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
@@ -97,14 +85,14 @@ export default function Login({ navigation }: any) {
         <View
           style={[
             styles.inputContainer,
-            { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+            { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' },
           ]}
         >
-          <Ionicons name="lock-closed-outline" size={20} color={theme.colors.primary} style={styles.icon} />
+          <Ionicons name="lock-closed-outline" size={20} color="#22C55E" style={styles.icon} />
           <TextInput
-            style={[styles.input, { color: theme.colors.text }]}
-            placeholder={t('login.placeholders.password')}
-            placeholderTextColor={theme.colors.mutedText}
+            style={[styles.input, { color: '#0B1220' }]}
+            placeholder="Senha"
+            placeholderTextColor="#6B7280"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
@@ -112,52 +100,31 @@ export default function Login({ navigation }: any) {
         </View>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: theme.colors.primary }]}
+          style={[styles.button, { backgroundColor: '#22C55E' }]}
           onPress={handleLogin}
           activeOpacity={0.85}
           disabled={loading}
         >
-          <Ionicons name="log-in-outline" size={22} color={theme.colors.primaryText} />
-          <Text style={[styles.buttonText, { color: theme.colors.primaryText }]}>
-            {t('login.actions.enter')}
+          <Ionicons name="log-in-outline" size={22} color="#FFFFFF" />
+          <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
+            Entrar
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.registerButton}
-          // Ajuste o nome da rota conforme seu Tab/Stack. Se a tela estiver registrada como "Cadastro", use "Cadastro".
           onPress={() => navigation.navigate('Cadastro')}
         >
-          <Text style={[styles.registerText, { color: theme.colors.primary }]}>
-            {t('login.actions.register')}
+          <Text style={[styles.registerText, { color: '#22C55E' }]}>
+            Cadastrar
           </Text>
         </TouchableOpacity>
-
-        <View style={styles.switchRow}>
-          {/* Botão de tema */}
-          <TouchableOpacity style={[styles.switchBtn, { backgroundColor: theme.colors.surface }]} onPress={toggleTheme} activeOpacity={0.7}>
-            <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={18} color={theme.colors.text} />
-            <Text style={[styles.switchText, { color: theme.colors.text }]}>
-              {isDark ? t('home.theme.lightMode') : t('home.theme.darkMode')}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Botão de idioma */}
-          <TouchableOpacity style={[styles.switchBtn, { backgroundColor: theme.colors.surface }]} onPress={toggleLanguage} activeOpacity={0.7}>
-            <Ionicons name="language-outline" size={18} color={theme.colors.text} />
-            <Text style={[styles.switchText, { color: theme.colors.text }]}>
-              {locale === 'pt-BR'
-                ? t('home.language.portugueseShort')
-                : t('home.language.spanishShort')}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <Modal transparent visible={loading} animationType="fade">
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: '#fff' }]}>{t('login.loading')}</Text>
+          <ActivityIndicator size="large" color="#22C55E" />
+          <Text style={[styles.loadingText, { color: '#fff' }]}>Carregando...</Text>
         </View>
       </Modal>
     </SafeAreaView>

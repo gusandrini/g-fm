@@ -1,9 +1,7 @@
 import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
-import { styles } from '@/styles/components/Footer';
 
 interface FooterItem {
   label: string;
@@ -17,20 +15,10 @@ interface FooterProps {
 }
 
 export function Footer({ items, activeScreen }: FooterProps) {
-  const { theme } = useTheme();
   const navigation = useNavigation();
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          height: theme.sizes.footer,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       {items.map((item) => {
         const isActive = item.screen === activeScreen;
         return (
@@ -43,12 +31,12 @@ export function Footer({ items, activeScreen }: FooterProps) {
             <Ionicons
               name={item.icon}
               size={24}
-              color={isActive ? theme.colors.primary : theme.colors.text}
+              color={isActive ? '#22C55E' : '#0B1220'}
             />
             <Text
               style={[
                 styles.label,
-                { color: isActive ? theme.colors.primary : theme.colors.mutedText },
+                { color: isActive ? '#22C55E' : '#6B7280' },
               ]}
             >
               {item.label}
@@ -59,3 +47,24 @@ export function Footer({ items, activeScreen }: FooterProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    height: 64,
+    paddingBottom: 4,
+    paddingTop: 8,
+  },
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+});

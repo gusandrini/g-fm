@@ -14,17 +14,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useTheme } from '@/context/ThemeContext';
-import { useI18n } from '@/i18n/I18nProvider';
-
 import { FuncionarioCad } from '@/models/funcionarioCad';
 import { addFuncionario } from '@/api/funcionario';
 
 import { styles } from '@/styles/screens/Cadastro';
 
 export default function CadastroFuncionario({ navigation }: any) {
-  const { theme } = useTheme();
-  const { t } = useI18n();
 
   const [nome, setNome] = useState('');
   const [emailCorporativo, setEmailCorporativo] = useState('');
@@ -37,11 +32,11 @@ export default function CadastroFuncionario({ navigation }: any) {
 
   const handleSave = async () => {
     if (!nome || !emailCorporativo || !senha || !cargo) {
-      Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.required'));
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
     if (!validarEmail(emailCorporativo)) {
-      Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.invalidEmail'));
+      Alert.alert('Erro', 'Email inválido');
       return;
     }
 
@@ -57,8 +52,8 @@ export default function CadastroFuncionario({ navigation }: any) {
     try {
       setLoading(true);
       await addFuncionario(payload);
-      Alert.alert(t('employeeForm.alerts.successTitle'), t('employeeForm.alerts.created'), [
-        { text: t('common.ok'), onPress: () => navigation.replace('Login') },
+      Alert.alert('Sucesso', 'Funcionário cadastrado com sucesso', [
+        { text: 'OK', onPress: () => navigation.replace('Login') },
       ]);
       setNome('');
       setEmailCorporativo('');
@@ -68,18 +63,18 @@ export default function CadastroFuncionario({ navigation }: any) {
     } catch (error: any) {
       if (error?.response) {
         if (error.response.status === 401) {
-          Alert.alert(t('employeeForm.alerts.unauthorizedTitle'), t('employeeForm.alerts.unauthorizedMsg'));
+          Alert.alert('Erro', 'Não autorizado');
         } else if (error.response.status === 403) {
-          Alert.alert(t('employeeForm.alerts.forbiddenTitle'), t('employeeForm.alerts.forbiddenMsg'));
+          Alert.alert('Erro', 'Acesso negado');
         } else {
           const msg =
             error.response.data?.message ||
             error.response.data?.error ||
-            t('employeeForm.alerts.unknownServerError');
-          Alert.alert(`${t('employeeForm.alerts.errorCode')} ${error.response.status}`, msg);
+            'Erro desconhecido do servidor';
+          Alert.alert(`Erro ${error.response.status}`, msg);
         }
       } else {
-        Alert.alert(t('employeeForm.alerts.errorTitle'), t('employeeForm.alerts.cannotConnect'));
+        Alert.alert('Erro', 'Não foi possível conectar ao servidor');
       }
     } finally {
       setLoading(false);
@@ -87,13 +82,13 @@ export default function CadastroFuncionario({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#F7F8FA' }]}>
       {/* overlay de carregamento */}
       <Modal transparent visible={loading}>
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.loadingText, { color: theme.colors.text }]}>
-            {t('employeeForm.loading')}
+          <ActivityIndicator size="large" color="#22C55E" />
+          <Text style={[styles.loadingText, { color: '#0B1220' }]}>
+            Carregando...
           </Text>
         </View>
       </Modal>
@@ -105,94 +100,94 @@ export default function CadastroFuncionario({ navigation }: any) {
       >
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {/* Nome */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>
-            {t('employeeForm.labels.name')}
+          <Text style={[styles.label, { color: '#0B1220' }]}>
+            Nome
           </Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+              { borderColor: '#E5E7EB', color: '#0B1220', backgroundColor: '#FFFFFF' },
             ]}
             value={nome}
             onChangeText={setNome}
-            placeholder={t('employeeForm.placeholders.name')}
-            placeholderTextColor={theme.colors.mutedText}
+            placeholder="Nome completo"
+            placeholderTextColor="#6B7280"
           />
 
           {/* Email corporativo */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>
-            {t('employeeForm.labels.corpEmail')}
+          <Text style={[styles.label, { color: '#0B1220' }]}>
+            Email Corporativo
           </Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+              { borderColor: '#E5E7EB', color: '#0B1220', backgroundColor: '#FFFFFF' },
             ]}
             value={emailCorporativo}
             onChangeText={setEmailCorporativo}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholder={t('employeeForm.placeholders.corpEmail')}
-            placeholderTextColor={theme.colors.mutedText}
+            placeholder="email@empresa.com"
+            placeholderTextColor="#6B7280"
           />
 
           {/* Senha */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>
-            {t('employeeForm.labels.password')}
+          <Text style={[styles.label, { color: '#0B1220' }]}>
+            Senha
           </Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+              { borderColor: '#E5E7EB', color: '#0B1220', backgroundColor: '#FFFFFF' },
             ]}
             value={senha}
             onChangeText={setSenha}
             secureTextEntry
-            placeholder={t('employeeForm.placeholders.password')}
-            placeholderTextColor={theme.colors.mutedText}
+            placeholder="Senha"
+            placeholderTextColor="#6B7280"
           />
 
           {/* Cargo */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>
-            {t('employeeForm.labels.role')}
+          <Text style={[styles.label, { color: '#0B1220' }]}>
+            Cargo
           </Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+              { borderColor: '#E5E7EB', color: '#0B1220', backgroundColor: '#FFFFFF' },
             ]}
             value={cargo}
             onChangeText={setCargo}
-            placeholder={t('employeeForm.placeholders.role')}
-            placeholderTextColor={theme.colors.mutedText}
+            placeholder="Cargo"
+            placeholderTextColor="#6B7280"
           />
 
           {/* Id Filial (opcional) */}
-          <Text style={[styles.label, { color: theme.colors.text }]}>
-            {t('employeeForm.labels.branchIdOptional')}
+          <Text style={[styles.label, { color: '#0B1220' }]}>
+            ID Filial (Opcional)
           </Text>
           <TextInput
             style={[
               styles.input,
-              { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface },
+              { borderColor: '#E5E7EB', color: '#0B1220', backgroundColor: '#FFFFFF' },
             ]}
             value={idFilial}
             onChangeText={setIdFilial}
             keyboardType="numeric"
-            placeholder={t('employeeForm.placeholders.branchId')}
-            placeholderTextColor={theme.colors.mutedText}
+            placeholder="ID da Filial"
+            placeholderTextColor="#6B7280"
           />
 
           {/* Botão salvar */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+            style={[styles.button, { backgroundColor: '#22C55E' }]}
             onPress={handleSave}
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="save" size={20} color={theme.colors.primaryText} />
-            <Text style={[styles.buttonText, { color: theme.colors.primaryText }]}>
-              {t('employeeForm.actions.saveEmployee')}
+            <Ionicons name="save" size={20} color="#FFFFFF" />
+            <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
+              Salvar Funcionário
             </Text>
           </TouchableOpacity>
         </ScrollView>

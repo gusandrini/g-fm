@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
 
 // Screens
 import Home from '@/screens/Home';
@@ -14,20 +13,18 @@ import { Header } from '@/components/Header';
 const Tab = createBottomTabNavigator();
 
 export function RootTabs() {
-  const { theme } = useTheme();
-
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         header: () => <Header title={route.name} />, // Header global
         tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          height: theme.sizes.footer,
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#E5E7EB',
+          height: 64,
           paddingBottom: 4,
         },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.mutedText,
+        tabBarActiveTintColor: '#22C55E',
+        tabBarInactiveTintColor: '#6B7280',
         tabBarIcon: ({ color, size }) => {
           let icon: keyof typeof Ionicons.glyphMap = 'home-outline';
           if (route.name === 'SobreNos') icon = 'information-circle-outline';

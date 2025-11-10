@@ -1,9 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@/context/ThemeContext';
-import { styles } from '@/styles/components/Header';
 
 interface HeaderProps {
   title?: string;
@@ -14,29 +12,19 @@ interface HeaderProps {
 
 export function Header({ title, showBack = false, rightIcon, onRightPress }: HeaderProps) {
   const navigation = useNavigation();
-  const { theme } = useTheme();
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.surface,
-          borderBottomColor: theme.colors.border,
-          height: theme.sizes.header,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       {showBack ? (
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconLeft}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+          <Ionicons name="arrow-back" size={24} color="#0B1220" />
         </TouchableOpacity>
       ) : (
         <View style={styles.iconLeft} />
       )}
 
       {title ? (
-        <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={1}>
+        <Text style={styles.title} numberOfLines={1}>
           {title}
         </Text>
       ) : (
@@ -45,7 +33,7 @@ export function Header({ title, showBack = false, rightIcon, onRightPress }: Hea
 
       {rightIcon ? (
         <TouchableOpacity onPress={onRightPress} style={styles.iconRight}>
-          <Ionicons name={rightIcon} size={24} color={theme.colors.text} />
+          <Ionicons name={rightIcon} size={24} color="#0B1220" />
         </TouchableOpacity>
       ) : (
         <View style={styles.iconRight} />
@@ -53,3 +41,30 @@ export function Header({ title, showBack = false, rightIcon, onRightPress }: Hea
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    height: 56,
+    paddingHorizontal: 16,
+  },
+  iconLeft: {
+    width: 40,
+    alignItems: 'flex-start',
+  },
+  iconRight: {
+    width: 40,
+    alignItems: 'flex-end',
+  },
+  title: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0B1220',
+    textAlign: 'center',
+  },
+});

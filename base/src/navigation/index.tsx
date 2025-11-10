@@ -1,25 +1,21 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { RootTabs } from './RootTabs';
-import { useTheme } from '@/context/ThemeContext';
+
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#22C55E',
+    background: '#F7F8FA',
+    card: '#FFFFFF',
+    text: '#0B1220',
+    border: '#E5E7EB',
+    notification: '#22C55E',
+  },
+};
 
 export function AppNavigation() {
-  const { theme } = useTheme();
-
-  const base = theme.name === 'dark' ? DarkTheme : DefaultTheme;
-  const navigationTheme = {
-    ...base,
-    colors: {
-      ...base.colors,
-      primary: theme.colors.primary,
-      background: theme.colors.background,
-      card: theme.colors.surface,
-      text: theme.colors.text,
-      border: theme.colors.border,
-      notification: theme.colors.primary,
-    },
-  };
-
   return (
     <NavigationContainer theme={navigationTheme}>
       <RootTabs />
