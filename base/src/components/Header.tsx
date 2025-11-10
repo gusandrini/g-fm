@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { styles } from '@/styles/components/Header';
 
 interface HeaderProps {
   title?: string;
@@ -41,30 +42,3 @@ export function Header({ title, showBack = false, rightIcon, onRightPress }: Hea
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    height: 56,
-    paddingHorizontal: 16,
-  },
-  iconLeft: {
-    width: 40,
-    alignItems: 'flex-start',
-  },
-  iconRight: {
-    width: 40,
-    alignItems: 'flex-end',
-  },
-  title: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0B1220',
-    textAlign: 'center',
-  },
-});

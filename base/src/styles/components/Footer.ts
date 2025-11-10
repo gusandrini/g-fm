@@ -3,20 +3,20 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    elevation: 3, 
+    borderTopColor: '#E5E7EB',
+    height: 64,
     paddingBottom: 4,
+    paddingTop: 8,
   },
   item: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
   },
   label: {
     fontSize: 12,
-    marginTop: 2,
-    fontWeight: '500',
+    marginTop: 4,
   },
 });
