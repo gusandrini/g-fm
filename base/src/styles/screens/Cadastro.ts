@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F8FA', // fundo claro
+    backgroundColor: '#F7F8FA',
   },
   keyboard: {
     flex: 1,
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     fontWeight: '500',
-    color: '#0B1220', // texto principal escuro
+    color: '#0B1220',
   },
   input: {
     borderWidth: 1,
@@ -24,9 +24,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginTop: 6,
-    borderColor: '#E5E7EB', // borda suave
-    backgroundColor: '#FFFFFF', // fundo do campo
-    color: '#0B1220', // texto do input
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    color: '#0B1220',
   },
   button: {
     flexDirection: 'row',
@@ -35,13 +35,13 @@ export const styles = StyleSheet.create({
     marginTop: 24,
     paddingVertical: 12,
     borderRadius: 10,
-    backgroundColor: '#22C55E', // verde principal
+    backgroundColor: '#22C55E',
   },
   buttonText: {
     fontWeight: 'bold',
     marginLeft: 8,
     fontSize: 15,
-    color: '#FFFFFF', // texto do botão
+    color: '#FFFFFF',
   },
   loadingOverlay: {
     flex: 1,
@@ -55,6 +55,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#FFFFFF', // texto branco sobre overlay escuro
+    color: '#FFFFFF',
   },
 });

@@ -12,10 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // ✅ IMPORT CORRETO
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 
-// se já tem seus styles em outro arquivo, mantenha o import:
-// import { styles } from '@/styles/screens/Cadastro';
+import { styles } from '../styles/screens/Cadastro';
 
 const COLORS = {
   primary: '#22C55E',
@@ -25,27 +24,6 @@ const COLORS = {
   text: '#0B1220',
   border: '#E5E7EB',
   mutedText: '#6B7280',
-};
-
-// se não estiver importando de um arquivo externo, use este fallback:
-const styles = {
-  container: { flex: 1, backgroundColor: COLORS.background } as const,
-  keyboard: { flex: 1 } as const,
-  content: { paddingHorizontal: 16, paddingVertical: 20 } as const,
-  label: { marginTop: 12, fontSize: 16, fontWeight: '500', color: COLORS.text } as const,
-  input: {
-    borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginTop: 6,
-    borderColor: COLORS.border, backgroundColor: COLORS.surface, color: COLORS.text,
-  } as const,
-  button: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    marginTop: 24, paddingVertical: 12, borderRadius: 10, backgroundColor: COLORS.primary,
-  } as const,
-  buttonText: { fontWeight: 'bold', marginLeft: 8, fontSize: 15, color: COLORS.primaryText } as const,
-  loadingOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24,
-  } as const,
-  loadingText: { marginTop: 12, fontSize: 16, fontWeight: '600', textAlign: 'center', color: '#FFFFFF' } as const,
 };
 
 export default function CadastroFuncionario({ navigation }: any) {
@@ -78,15 +56,6 @@ export default function CadastroFuncionario({ navigation }: any) {
       Alert.alert('Erro', 'ID da Filial deve ser numérico.');
       return;
     }
-
-    const payload = {
-      idFuncionario: 0,
-      idFilial: idFilialNumber,
-      nome: nomeTrim,
-      emailCorporativo: emailTrim,
-      senhaHash: senhaTrim,
-      cargo: cargoTrim,
-    };
 
     try {
       setLoading(true);
