@@ -15,7 +15,14 @@ import axios from 'axios';
 import { useSession } from '@/services/SessionProvider';
 import { styles } from '@/styles/screens/Login';
 
-export default function Login({ navigation }: any) {
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/types/navigation';
+
+type Nav = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+
+export default function Login() {
+  const navigation = useNavigation<Nav>();
   const { login } = useSession();
 
   const [email, setEmail] = useState('');
@@ -37,7 +44,11 @@ export default function Login({ navigation }: any) {
         return;
       }
 
-      navigation.replace('Home');
+      // ✅ Depois de logar, vá para as Tabs (Home é a aba inicial)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tabs' }],
+      });
     } catch (err: any) {
       console.error('Erro no login:', err);
 
@@ -63,12 +74,7 @@ export default function Login({ navigation }: any) {
         <Text style={[styles.title, { color: '#22C55E' }]}>Login</Text>
         <Text style={[styles.subtitle, { color: '#0B1220' }]}>Entre com suas credenciais</Text>
 
-        <View
-          style={[
-            styles.inputContainer,
-            { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' },
-          ]}
-        >
+        <View style={[styles.inputContainer, { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }]}>
           <Ionicons name="mail-outline" size={20} color="#22C55E" style={styles.icon} />
           <TextInput
             style={[styles.input, { color: '#0B1220' }]}
@@ -82,12 +88,7 @@ export default function Login({ navigation }: any) {
           />
         </View>
 
-        <View
-          style={[
-            styles.inputContainer,
-            { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' },
-          ]}
-        >
+        <View style={[styles.inputContainer, { borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }]}>
           <Ionicons name="lock-closed-outline" size={20} color="#22C55E" style={styles.icon} />
           <TextInput
             style={[styles.input, { color: '#0B1220' }]}
@@ -106,17 +107,13 @@ export default function Login({ navigation }: any) {
           disabled={loading}
         >
           <Ionicons name="log-in-outline" size={22} color="#FFFFFF" />
-          <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
-            Entrar
-          </Text>
+          <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>Entrar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={() => navigation.navigate('Cadastro')}
-        >
-          <Text style={[styles.registerText, { color: '#22C55E' }]}>
-            Cadastrar
+        {/* 👉 Link para Cadastro (mesmo Stack) */}
+        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')} style={{ marginTop: 12 }}>
+          <Text style={{ color: '#2563EB', textAlign: 'center' }}>
+            Não tem conta? Cadastrar
           </Text>
         </TouchableOpacity>
       </View>

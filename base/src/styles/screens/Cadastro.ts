@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F7F8FA', // fundo claro
   },
   keyboard: {
     flex: 1,
@@ -15,6 +16,7 @@ export const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     fontWeight: '500',
+    color: '#0B1220', // texto principal escuro
   },
   input: {
     borderWidth: 1,
@@ -22,6 +24,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginTop: 6,
+    borderColor: '#E5E7EB', // borda suave
+    backgroundColor: '#FFFFFF', // fundo do campo
+    color: '#0B1220', // texto do input
   },
   button: {
     flexDirection: 'row',
@@ -30,11 +35,13 @@ export const styles = StyleSheet.create({
     marginTop: 24,
     paddingVertical: 12,
     borderRadius: 10,
+    backgroundColor: '#22C55E', // verde principal
   },
   buttonText: {
     fontWeight: 'bold',
     marginLeft: 8,
     fontSize: 15,
+    color: '#FFFFFF', // texto do botão
   },
   loadingOverlay: {
     flex: 1,
@@ -48,5 +55,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+    color: '#FFFFFF', // texto branco sobre overlay escuro
   },
 });

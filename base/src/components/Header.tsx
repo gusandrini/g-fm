@@ -1,44 +1,55 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { styles } from '@/styles/components/Header';
+import { Ionicons } from '@expo/vector-icons';
 
-interface HeaderProps {
+type IconName = keyof typeof Ionicons.glyphMap;
+
+export function Header({
+  title,
+  showBack = false,
+  rightIcon,
+  onRightPress,
+}: {
   title?: string;
   showBack?: boolean;
-  rightIcon?: keyof typeof Ionicons.glyphMap;
+  rightIcon?: IconName;
   onRightPress?: () => void;
-}
-
-export function Header({ title, showBack = false, rightIcon, onRightPress }: HeaderProps) {
+}) {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
       {showBack ? (
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconLeft}>
-          <Ionicons name="arrow-back" size={24} color="#0B1220" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.side}>
+          <Ionicons name="chevron-back" size={22} color="#0B1220" />
         </TouchableOpacity>
       ) : (
-        <View style={styles.iconLeft} />
+        <View style={styles.side} />
       )}
 
-      {title ? (
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-      ) : (
-        <View style={{ flex: 1 }} />
-      )}
+      <Text style={styles.title}>{title || ''}</Text>
 
       {rightIcon ? (
-        <TouchableOpacity onPress={onRightPress} style={styles.iconRight}>
-          <Ionicons name={rightIcon} size={24} color="#0B1220" />
+        <TouchableOpacity onPress={onRightPress} style={styles.side}>
+          <Ionicons name={rightIcon} size={22} color="#0B1220" />
         </TouchableOpacity>
       ) : (
-        <View style={styles.iconRight} />
+        <View style={styles.side} />
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 56,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  side: { width: 56, alignItems: 'center', justifyContent: 'center' },
+  title: { flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '600', color: '#0B1220' },
+});

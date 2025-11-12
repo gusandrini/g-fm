@@ -2,51 +2,52 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-// Screens
 import Home from '@/screens/Home';
 import SobreNos from '@/screens/SobreNos';
-import Cadastro from '@/screens/Cadastro';
+import Doar from '@/screens/Doar';
 import OngList from '@/screens/OngList';
+import HistDoacao from '@/screens/HistDoacao';
 
-// Header personalizado
-import { Header } from '@/components/Header';
+export type TabParamList = {
+  Home: undefined;
+  OngList: undefined;
+  Doar: undefined;
+  HistDoacao: undefined;
+  SobreNos: undefined;
+};
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<TabParamList>();
 
-// Mapeamento de nomes de rotas para títulos
-const routeTitleMap: Record<string, string> = {
+const titles: Record<keyof TabParamList, string> = {
   Home: 'Home',
   OngList: 'ONGs',
+  Doar: 'Doar',
+  HistDoacao: 'Histórico',
   SobreNos: 'Sobre Nós',
-  Cadastro: 'Perfil',
 };
 
 export function RootTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        header: () => <Header title={routeTitleMap[route.name] || route.name} />, // Header global
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#E5E7EB',
-          height: 64,
-          paddingBottom: 4,
-        },
-        tabBarActiveTintColor: '#22C55E',
-        tabBarInactiveTintColor: '#6B7280',
+        headerShown: true,
+        title: titles[route.name],
         tabBarIcon: ({ color, size }) => {
           let icon: keyof typeof Ionicons.glyphMap = 'home-outline';
+          if (route.name === 'Home') icon = 'home-outline';
+          if (route.name === 'OngList') icon = 'people-outline';
+          if (route.name === 'Doar') icon = 'heart-outline';
+          if (route.name === 'HistDoacao') icon = 'time-outline';
           if (route.name === 'SobreNos') icon = 'information-circle-outline';
-          if (route.name === 'Cadastro') icon = 'person-outline';
-          if (route.name === 'OngList') icon = 'business-outline';
-          return <Ionicons name={icon} color={color} size={size} />;
+          return <Ionicons name={icon} size={size} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="OngList" component={OngList} options={{ title: 'ONGs' }} />
-      <Tab.Screen name="SobreNos" component={SobreNos} options={{ title: 'Sobre Nós' }} />
-      <Tab.Screen name="Cadastro" component={Cadastro} options={{ title: 'Perfil' }} />
+      <Tab.Screen name="OngList" component={OngList} />
+      <Tab.Screen name="Doar" component={Doar} />
+      <Tab.Screen name="HistDoacao" component={HistDoacao} />
+      <Tab.Screen name="SobreNos" component={SobreNos} />
     </Tab.Navigator>
   );
 }

@@ -1,24 +1,27 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import Login from '@/screens/Login';
+import Cadastro from '@/screens/Cadastro';
 import { RootTabs } from './RootTabs';
 
-const navigationTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#22C55E',
-    background: '#F7F8FA',
-    card: '#FFFFFF',
-    text: '#0B1220',
-    border: '#E5E7EB',
-    notification: '#22C55E',
-  },
+export type RootStackParamList = {
+  Login: undefined;
+  Cadastro: undefined;
+  Tabs: undefined;
 };
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigation() {
   return (
-    <NavigationContainer theme={navigationTheme}>
-      <RootTabs />
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Cadastro" component={Cadastro} />
+        <Stack.Screen name="Tabs" component={RootTabs} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
