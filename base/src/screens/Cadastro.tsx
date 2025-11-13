@@ -12,9 +12,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '../styles/screens/Cadastro';
+
+// 👉 importa a API e o model do usuário
+import { criarUsuario } from '@/api/usuario';
+import { UsuarioCreate } from '@/models/usuario';
 
 const COLORS = {
   primary: '#22C55E',
@@ -26,44 +30,60 @@ const COLORS = {
   mutedText: '#6B7280',
 };
 
-export default function CadastroFuncionario({ navigation }: any) {
+export default function CadastroUsuario({ navigation }: any) {
   const [nome, setNome] = useState('');
-  const [emailCorporativo, setEmailCorporativo] = useState('');
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [cargo, setCargo] = useState('');
-  const [idFilial, setIdFilial] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [idEndereco, setIdEndereco] = useState('');
   const [loading, setLoading] = useState(false);
 
   const validarEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSave = useCallback(async () => {
     const nomeTrim = nome.trim();
-    const emailTrim = emailCorporativo.trim();
+    const emailTrim = email.trim();
     const senhaTrim = senha.trim();
-    const cargoTrim = cargo.trim();
+    const telefoneTrim = telefone.trim();
+    const idEnderecoTrim = idEndereco.trim();
 
-    if (!nomeTrim || !emailTrim || !senhaTrim || !cargoTrim) {
-      Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos.');
+    if (!nomeTrim || !emailTrim || !senhaTrim || !idEnderecoTrim) {
+      Alert.alert('Erro', 'Nome, e-mail, senha e ID do endereço são obrigatórios.');
       return;
     }
+
     if (!validarEmail(emailTrim)) {
       Alert.alert('Erro', 'E-mail inválido.');
       return;
     }
 
-    const idFilialNumber = idFilial ? Number(idFilial) : 0;
-    if (idFilial && Number.isNaN(idFilialNumber)) {
-      Alert.alert('Erro', 'ID da Filial deve ser numérico.');
+    const idEnderecoNumber = Number(idEnderecoTrim);
+    if (Number.isNaN(idEnderecoNumber)) {
+      Alert.alert('Erro', 'ID do endereço deve ser numérico.');
       return;
     }
 
+    const payload: UsuarioCreate = {
+      nome: nomeTrim,
+      email: emailTrim,
+      senha: senhaTrim,
+      telefone: telefoneTrim || undefined,
+      idEndereco: idEnderecoNumber,
+    };
+
     try {
       setLoading(true);
-      // await addFuncionario(payload); // reative sua chamada
-      Alert.alert('Sucesso', 'Funcionário cadastrado com sucesso!', [
+      await criarUsuario(payload);
+
+      Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!', [
         { text: 'OK', onPress: () => navigation.replace('Login') },
       ]);
-      setNome(''); setEmailCorporativo(''); setSenha(''); setCargo(''); setIdFilial('');
+
+      setNome('');
+      setEmail('');
+      setSenha('');
+      setTelefone('');
+      setIdEndereco('');
     } catch (error: any) {
       if (error?.response) {
         if (error.response.status === 401) {
@@ -71,7 +91,10 @@ export default function CadastroFuncionario({ navigation }: any) {
         } else if (error.response.status === 403) {
           Alert.alert('Acesso negado', 'Acesso proibido para este usuário.');
         } else {
-          const msg = error.response.data?.message || error.response.data?.error || 'Erro desconhecido no servidor.';
+          const msg =
+            error.response.data?.message ||
+            error.response.data?.error ||
+            'Erro desconhecido no servidor.';
           Alert.alert(`Erro ${error.response.status}`, msg);
         }
       } else {
@@ -80,23 +103,22 @@ export default function CadastroFuncionario({ navigation }: any) {
     } finally {
       setLoading(false);
     }
-  }, [nome, emailCorporativo, senha, cargo, idFilial, navigation]);
+  }, [nome, email, senha, telefone, idEndereco, navigation]);
 
   return (
-    // ✅ SafeAreaView com edges para respeitar topo/rodapé (notch e barras)
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Overlay de carregamento */}
       <Modal transparent visible={loading} animationType="fade" statusBarTranslucent>
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Salvando...</Text>
+          <Text style={styles.loadingText}>Cadastrando...</Text>
         </View>
       </Modal>
 
       <KeyboardAvoidingView
         style={styles.keyboard}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // ajuste se seu header custom mudar
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
         <ScrollView
           contentContainerStyle={styles.content}
@@ -108,22 +130,22 @@ export default function CadastroFuncionario({ navigation }: any) {
             style={styles.input}
             value={nome}
             onChangeText={setNome}
-            placeholder="Digite o nome"
+            placeholder="Digite seu nome"
             placeholderTextColor={COLORS.mutedText}
             autoCapitalize="words"
             returnKeyType="next"
           />
 
-          <Text style={styles.label}>E-mail corporativo</Text>
+          <Text style={styles.label}>E-mail</Text>
           <TextInput
             style={styles.input}
-            value={emailCorporativo}
-            onChangeText={setEmailCorporativo}
+            value={email}
+            onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
             textContentType="emailAddress"
-            placeholder="exemplo@empresa.com"
+            placeholder="exemplo@helplink.com"
             placeholderTextColor={COLORS.mutedText}
             returnKeyType="next"
           />
@@ -137,27 +159,27 @@ export default function CadastroFuncionario({ navigation }: any) {
             autoCapitalize="none"
             autoComplete="password"
             textContentType="password"
-            placeholder="Digite a senha"
+            placeholder="Digite sua senha"
             placeholderTextColor={COLORS.mutedText}
-            returnKeyType="done"
-          />
-
-          <Text style={styles.label}>Cargo</Text>
-          <TextInput
-            style={styles.input}
-            value={cargo}
-            onChangeText={setCargo}
-            placeholder="Digite o cargo"
-            placeholderTextColor={COLORS.mutedText}
-            autoCapitalize="sentences"
             returnKeyType="next"
           />
 
-          <Text style={styles.label}>ID da Filial (opcional)</Text>
+          <Text style={styles.label}>Telefone (opcional)</Text>
           <TextInput
             style={styles.input}
-            value={idFilial}
-            onChangeText={setIdFilial}
+            value={telefone}
+            onChangeText={setTelefone}
+            keyboardType="phone-pad"
+            placeholder="(11) 99999-9999"
+            placeholderTextColor={COLORS.mutedText}
+            returnKeyType="next"
+          />
+
+          <Text style={styles.label}>ID do Endereço</Text>
+          <TextInput
+            style={styles.input}
+            value={idEndereco}
+            onChangeText={setIdEndereco}
             keyboardType="numeric"
             placeholder="Ex: 1"
             placeholderTextColor={COLORS.mutedText}
@@ -171,7 +193,7 @@ export default function CadastroFuncionario({ navigation }: any) {
             activeOpacity={0.8}
           >
             <Ionicons name="save-outline" size={20} color={COLORS.primaryText} />
-            <Text style={styles.buttonText}>Salvar Funcionário</Text>
+            <Text style={styles.buttonText}>Cadastrar Usuário</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
