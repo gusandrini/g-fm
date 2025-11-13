@@ -1,16 +1,12 @@
-export interface Ong {
-  id: number;
-  nome: string;
-  descricao?: string;
-  cnpj?: string;
-  email?: string;
-  telefone?: string;
-  endereco?: string;
-  cidade?: string;
-  estado?: string;
-  cep?: string;
-  site?: string;
-  imagem?: string;
-  categoria?: string;
-}
+import { EnderecoDTO } from './enderecoDTO';
 
+export interface Instituicao {
+  idInstituicao: number;
+  nome: string;
+  cnpj: string;
+  email: string;
+  categoriasAceitas: string;
+  telefone: string;
+  dtCadastro: string; // ISO date string
+  endereco: EnderecoDTO;
+}

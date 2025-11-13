@@ -1,23 +1,29 @@
 export interface Doacao {
-  id: number;
-  idUsuario: number;
-  idOng: number;
-  valor: number;
-  dataDoacao: string;
-  status?: string;
-  metodoPagamento?: string;
-  observacao?: string;
-  ong?: {
-    id: number;
-    nome: string;
-    imagem?: string;
-  };
+  idDoacao: number;
+  status: string;
+  dtSolicitacao: string;      // vem como ISO string da API
+  dtConfirmacao?: string | null;
+
+  usuarioId: number;
+  usuarioNome: string;
+
+  instituicaoId: number;
+  instituicaoNome: string;
+
+  itens?: ItemDTO[] | null;
+  impacto?: ImpactoDTO | null;
 }
 
-export interface CriarDoacao {
-  idOng: number;
-  valor: number;
-  metodoPagamento: string;
-  observacao?: string;
+// =========== MODELOS COMPLEMENTARES =========== //
+
+export interface ItemDTO {
+  idItem: number;
+  nomeItem: string;
+  quantidade: number;
 }
 
+export interface ImpactoDTO {
+  idImpacto: number;
+  descricao: string;
+  valorEstimado: number;
+}
