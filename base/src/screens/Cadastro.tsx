@@ -16,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '../styles/screens/Cadastro';
 
-// 👉 importa a API e o model do usuário
 import { criarUsuario } from '@/api/usuario';
 import { UsuarioCreate } from '@/models/usuario';
 
@@ -35,20 +34,19 @@ export default function CadastroUsuario({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [telefone, setTelefone] = useState('');
-  const [idEndereco, setIdEndereco] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validarEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const validarEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSave = useCallback(async () => {
     const nomeTrim = nome.trim();
     const emailTrim = email.trim();
     const senhaTrim = senha.trim();
     const telefoneTrim = telefone.trim();
-    const idEnderecoTrim = idEndereco.trim();
 
-    if (!nomeTrim || !emailTrim || !senhaTrim || !idEnderecoTrim) {
-      Alert.alert('Erro', 'Nome, e-mail, senha e ID do endereço são obrigatórios.');
+    if (!nomeTrim || !emailTrim || !senhaTrim) {
+      Alert.alert('Erro', 'Nome, e-mail e senha são obrigatórios.');
       return;
     }
 
@@ -57,18 +55,11 @@ export default function CadastroUsuario({ navigation }: any) {
       return;
     }
 
-    const idEnderecoNumber = Number(idEnderecoTrim);
-    if (Number.isNaN(idEnderecoNumber)) {
-      Alert.alert('Erro', 'ID do endereço deve ser numérico.');
-      return;
-    }
-
     const payload: UsuarioCreate = {
       nome: nomeTrim,
       email: emailTrim,
       senha: senhaTrim,
       telefone: telefoneTrim || undefined,
-      idEndereco: idEnderecoNumber,
     };
 
     try {
@@ -83,11 +74,13 @@ export default function CadastroUsuario({ navigation }: any) {
       setEmail('');
       setSenha('');
       setTelefone('');
-      setIdEndereco('');
     } catch (error: any) {
       if (error?.response) {
         if (error.response.status === 401) {
-          Alert.alert('Não autorizado', 'Você não tem permissão para realizar esta ação.');
+          Alert.alert(
+            'Não autorizado',
+            'Você não tem permissão para realizar esta ação.'
+          );
         } else if (error.response.status === 403) {
           Alert.alert('Acesso negado', 'Acesso proibido para este usuário.');
         } else {
@@ -103,11 +96,11 @@ export default function CadastroUsuario({ navigation }: any) {
     } finally {
       setLoading(false);
     }
-  }, [nome, email, senha, telefone, idEndereco, navigation]);
+  }, [nome, email, senha, telefone, navigation]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Overlay de carregamento */}
+      {/* Overlay de carregamento geral */}
       <Modal transparent visible={loading} animationType="fade" statusBarTranslucent>
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={COLORS.primary} />
@@ -171,17 +164,6 @@ export default function CadastroUsuario({ navigation }: any) {
             onChangeText={setTelefone}
             keyboardType="phone-pad"
             placeholder="(11) 99999-9999"
-            placeholderTextColor={COLORS.mutedText}
-            returnKeyType="next"
-          />
-
-          <Text style={styles.label}>ID do Endereço</Text>
-          <TextInput
-            style={styles.input}
-            value={idEndereco}
-            onChangeText={setIdEndereco}
-            keyboardType="numeric"
-            placeholder="Ex: 1"
             placeholderTextColor={COLORS.mutedText}
             returnKeyType="done"
           />

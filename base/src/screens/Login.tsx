@@ -30,43 +30,52 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Atenção', 'Preencha todos os campos');
+  console.log("[Login] handleLogin chamado com:", email);
+
+  if (!email.trim() || !password.trim()) {
+    Alert.alert('Atenção', 'Preencha todos os campos');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const ok = await login(email, password);
+
+    console.log("[Login] Resultado do login:", ok);
+
+    if (!ok) {
+      Alert.alert('Erro', 'Email ou senha inválidos');
       return;
     }
 
-    try {
-      setLoading(true);
-      const ok = await login(email, password);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Tabs' }],
+    });
+  } catch (err: any) {
+    console.error('Erro no login:', err);
 
-      if (!ok) {
+    if (axios.isAxiosError(err)) {
+      if (err.message?.includes('timeout')) {
+        Alert.alert(
+          'Erro de conexão',
+          'Tempo de conexão esgotado. Verifique se a API está rodando e se a URL está correta.'
+        );
+      } else if (err.response?.status === 500) {
+        Alert.alert('Erro no Servidor', 'Erro interno do servidor. Tente novamente mais tarde.');
+      } else if (err.response?.status === 401) {
         Alert.alert('Erro', 'Email ou senha inválidos');
-        return;
-      }
-
-      // ✅ Depois de logar, vá para as Tabs (Home é a aba inicial)
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Tabs' }],
-      });
-    } catch (err: any) {
-      console.error('Erro no login:', err);
-
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          Alert.alert('Erro', 'Email ou senha inválidos');
-        } else if (err.response?.status === 500) {
-          Alert.alert('Erro no Servidor', 'Erro interno do servidor. Tente novamente mais tarde.');
-        } else {
-          Alert.alert('Erro', 'Erro de conexão. Verifique sua internet.');
-        }
       } else {
-        Alert.alert('Erro', 'Erro inesperado. Tente novamente.');
+        Alert.alert('Erro', 'Erro de conexão. Verifique sua internet/API.');
       }
-    } finally {
-      setLoading(false);
+    } else {
+      Alert.alert('Erro', 'Erro inesperado. Tente novamente.');
     }
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: '#F7F8FA' }]}>

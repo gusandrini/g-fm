@@ -5,8 +5,8 @@ export interface Usuario {
   nome: string;
   email: string;
   telefone?: string | null;
-  dtCadastro: string;       // LocalDateTime -> string ISO
-  endereco: EnderecoDTO;   // mesmo DTO que você já usa nas instituições
+  dtCadastro: string;       
+  endereco: EnderecoDTO;  
 }
 
 export interface UsuarioCreate {

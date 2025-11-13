@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+
 import { Doacao } from '@/models/doacao';
-import { getDoacoes, getDoacoesByUsuario } from '@/api/doacao';
+import { getDoacoes } from '@/api/doacao';
 import { styles } from '@/styles/screens/HistDoacao';
 import { useSession } from '@/services/SessionProvider';
 
@@ -25,31 +26,25 @@ export default function HistDoacao() {
   const loadDoacoes = async () => {
     try {
       setError(null);
-      let data: Doacao[];
-      
-      // Se tiver usuário logado, buscar doações do usuário
-      // Caso contrário, buscar todas (a API pode filtrar automaticamente)
-      if (user?.idFuncionario) {
-        try {
-          data = await getDoacoesByUsuario(user.idFuncionario);
-        } catch {
-          // Se não houver endpoint específico, usar o geral
-          data = await getDoacoes();
-        }
-      } else {
-        data = await getDoacoes();
-      }
-      
-      setDoacoes(data);
+
+      // Busca todas as doações
+      const data = await getDoacoes();
+
+      // Se tiver usuário logado, filtra por usuarioId
+      const filtradas = user?.idUsuario
+        ? data.filter((d) => d.usuarioId === user.idUsuario)
+        : data;
+
+      setDoacoes(filtradas);
     } catch (err: any) {
       console.error('Erro ao carregar doações:', err);
       const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
+        err?.response?.data?.message ||
+        err?.message ||
         'Erro ao carregar histórico de doações. Verifique sua conexão.';
       setError(errorMessage);
 
-      if (err.response?.status === 401) {
+      if (err?.response?.status === 401) {
         Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
       }
     } finally {
@@ -60,6 +55,8 @@ export default function HistDoacao() {
 
   useEffect(() => {
     loadDoacoes();
+    // se quiser recarregar automaticamente quando o usuário mudar:
+    // }, [user]);
   }, []);
 
   const handleRefresh = () => {
@@ -67,7 +64,8 @@ export default function HistDoacao() {
     loadDoacoes();
   };
 
-  const formatarData = (data: string) => {
+  const formatarData = (data?: string | null) => {
+    if (!data) return '-';
     try {
       const date = new Date(data);
       return date.toLocaleDateString('pt-BR', {
@@ -82,50 +80,51 @@ export default function HistDoacao() {
     }
   };
 
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(valor);
-  };
-
   const getStatusStyle = (status?: string) => {
-    if (!status) return { container: styles.statusPendente, text: styles.statusTextPendente };
-    
-    const statusLower = status.toLowerCase();
-    if (statusLower.includes('aprovado') || statusLower.includes('confirmado')) {
+    const base = status?.toUpperCase() || 'ABERTA';
+
+    if (base === 'CONCLUIDA') {
       return { container: styles.statusAprovado, text: styles.statusTextAprovado };
     }
-    if (statusLower.includes('cancelado') || statusLower.includes('recusado')) {
+    if (base === 'CANCELADA') {
       return { container: styles.statusCancelado, text: styles.statusTextCancelado };
     }
+    // ABERTA ou qualquer outro → pendente
     return { container: styles.statusPendente, text: styles.statusTextPendente };
   };
 
   const getStatusLabel = (status?: string) => {
-    if (!status) return 'Pendente';
-    const statusLower = status.toLowerCase();
-    if (statusLower.includes('aprovado') || statusLower.includes('confirmado')) {
-      return 'Aprovado';
-    }
-    if (statusLower.includes('cancelado') || statusLower.includes('recusado')) {
-      return 'Cancelado';
-    }
-    return status;
+    const base = status?.toUpperCase() || 'ABERTA';
+    if (base === 'CONCLUIDA') return 'Concluída';
+    if (base === 'CANCELADA') return 'Cancelada';
+    if (base === 'ABERTA') return 'Aberta';
+    return status || 'Aberta';
   };
 
   const renderDoacaoItem = ({ item }: { item: Doacao }) => {
     const statusStyle = getStatusStyle(item.status);
+    const qtdItens = item.itens?.length ?? 0;
+    const nomesItens =
+      item.itens && item.itens.length > 0
+        ? item.itens.map((i) => i.titulo).join(', ')
+        : 'Nenhum item listado';
+
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>
-              {item.ong?.nome || 'ONG não informada'}
+              {item.instituicaoNome || 'Instituição não informada'}
             </Text>
-            <Text style={styles.cardDate}>{formatarData(item.dataDoacao)}</Text>
+            <Text style={styles.cardDate}>
+              Solicitada em: {formatarData(item.dtSolicitacao)}
+            </Text>
+            {item.dtConfirmacao && (
+              <Text style={styles.cardDate}>
+                Confirmada em: {formatarData(item.dtConfirmacao)}
+              </Text>
+            )}
           </View>
-          <Text style={styles.cardValor}>{formatarValor(item.valor)}</Text>
         </View>
 
         <View style={[styles.cardStatus, statusStyle.container]}>
@@ -134,23 +133,19 @@ export default function HistDoacao() {
           </Text>
         </View>
 
-        {item.metodoPagamento && (
-          <View style={styles.cardInfo}>
-            <Ionicons name="card-outline" size={16} color="#6B7280" />
-            <Text style={styles.cardInfoText}>
-              {item.metodoPagamento.charAt(0).toUpperCase() + item.metodoPagamento.slice(1)}
-            </Text>
-          </View>
-        )}
+        <View style={styles.cardInfo}>
+          <Ionicons name="cube-outline" size={16} color="#6B7280" />
+          <Text style={styles.cardInfoText}>
+            {qtdItens} item(s): {nomesItens}
+          </Text>
+        </View>
 
-        {item.observacao && (
-          <View style={styles.cardInfo}>
-            <Ionicons name="chatbubble-outline" size={16} color="#6B7280" />
-            <Text style={styles.cardInfoText} numberOfLines={2}>
-              {item.observacao}
-            </Text>
-          </View>
-        )}
+        <View style={styles.cardInfo}>
+          <Ionicons name="person-outline" size={16} color="#6B7280" />
+          <Text style={styles.cardInfoText}>
+            Doado por: {item.usuarioNome || 'Usuário não informado'}
+          </Text>
+        </View>
       </View>
     );
   };
@@ -199,7 +194,7 @@ export default function HistDoacao() {
       <FlatList
         data={doacoes}
         renderItem={renderDoacaoItem}
-        keyExtractor={(item: Doacao) => item.id.toString()}
+        keyExtractor={(item: Doacao) => item.idDoacao.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
@@ -214,4 +209,3 @@ export default function HistDoacao() {
     </SafeAreaView>
   );
 }
-

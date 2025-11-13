@@ -17,6 +17,8 @@ export const styles = StyleSheet.create({
     color: '#0B1220',
     marginBottom: 12,
   },
+
+  // Card usado para instituição e item na lista/modal
   ongCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -41,6 +43,8 @@ export const styles = StyleSheet.create({
     color: '#6B7280',
     marginLeft: 8,
   },
+
+  // Botão "Selecionar instituição / itens"
   selectOngButton: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -58,68 +62,16 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 8,
   },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    fontSize: 16,
-    color: '#0B1220',
-    marginBottom: 12,
-  },
+
+  // Label de campos (ex: "Observação")
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
     color: '#0B1220',
     marginBottom: 8,
   },
-  valorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  valorSymbol: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0B1220',
-    marginRight: 8,
-  },
-  valorInput: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#0B1220',
-  },
-  metodoPagamentoContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  metodoButton: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-  },
-  metodoButtonSelected: {
-    borderColor: '#22C55E',
-    backgroundColor: '#F0FDF4',
-  },
-  metodoButtonText: {
-    fontSize: 14,
-    color: '#0B1220',
-    fontWeight: '500',
-    marginTop: 8,
-  },
+
+  // Observação (textarea)
   observacaoInput: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -131,6 +83,43 @@ export const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: 'top',
   },
+
+  // 🔹 Container dos itens selecionados
+  selectedItemsContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  selectedItemsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0B1220',
+    marginBottom: 8,
+  },
+  selectedItemsChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    backgroundColor: '#F0FDF4',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#22C55E',
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipText: {
+    fontSize: 12,
+    color: '#166534',
+    fontWeight: '500',
+  },
+
+  // Botão principal
   button: {
     backgroundColor: '#22C55E',
     borderRadius: 12,
@@ -149,6 +138,8 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
+
+  // Loading overlay
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -161,4 +152,3 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
-
