@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Ong } from '@/models/ong';
-import { getOngs } from '@/api/ong';
+
+import { Instituicao } from '@/models/ong';
+import { getInstituicoes } from '@/api/ong';
 import { styles } from '@/styles/screens/OngList';
 
 export default function OngList() {
-  const [ongs, setOngs] = useState<Ong[]>([]);
+  const [ongs, setOngs] = useState<Instituicao[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,17 +24,17 @@ export default function OngList() {
   const loadOngs = async () => {
     try {
       setError(null);
-      const data = await getOngs();
+      const data = await getInstituicoes();
       setOngs(data);
     } catch (err: any) {
       console.error('Erro ao carregar ONGs:', err);
       const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        'Erro ao carregar lista de ONGs. Verifique sua conexão.';
+        err?.response?.data?.message ||
+        err?.message ||
+        'Erro ao carregar lista de instituições. Verifique sua conexão.';
       setError(errorMessage);
-      
-      if (err.response?.status === 401) {
+
+      if (err?.response?.status === 401) {
         Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
       }
     } finally {
@@ -51,26 +52,31 @@ export default function OngList() {
     loadOngs();
   };
 
-  const renderOngItem = ({ item }: { item: Ong }) => (
+  const renderOngItem = ({ item }: { item: Instituicao }) => (
     <View style={styles.card}>
+      {/* Cabeçalho */}
       <View style={styles.cardHeader}>
         <Ionicons name="business-outline" size={24} color="#22C55E" />
         <Text style={styles.cardTitle}>{item.nome}</Text>
       </View>
 
-      {item.descricao && (
-        <Text style={styles.cardDescription} numberOfLines={3}>
-          {item.descricao}
-        </Text>
-      )}
-
-      {item.categoria && (
+      {/* Categoria(s) aceitas */}
+      {item.categoriasAceitas && (
         <View style={styles.cardInfo}>
           <Ionicons name="pricetag-outline" size={16} color="#6B7280" />
-          <Text style={styles.cardInfoText}>{item.categoria}</Text>
+          <Text style={styles.cardInfoText}>{item.categoriasAceitas}</Text>
         </View>
       )}
 
+      {/* CNPJ */}
+      {item.cnpj && (
+        <View style={styles.cardInfo}>
+          <Ionicons name="document-text-outline" size={16} color="#6B7280" />
+          <Text style={styles.cardInfoText}>{item.cnpj}</Text>
+        </View>
+      )}
+
+      {/* E-mail */}
       {item.email && (
         <View style={styles.cardInfo}>
           <Ionicons name="mail-outline" size={16} color="#6B7280" />
@@ -78,6 +84,7 @@ export default function OngList() {
         </View>
       )}
 
+      {/* Telefone */}
       {item.telefone && (
         <View style={styles.cardInfo}>
           <Ionicons name="call-outline" size={16} color="#6B7280" />
@@ -85,12 +92,13 @@ export default function OngList() {
         </View>
       )}
 
+      {/* Endereço (EnderecoDTO) */}
       {item.endereco && (
         <View style={styles.cardInfo}>
           <Ionicons name="location-outline" size={16} color="#6B7280" />
           <Text style={styles.cardInfoText} numberOfLines={2}>
-            {item.endereco}
-            {item.cidade && item.estado && `, ${item.cidade} - ${item.estado}`}
+            {item.endereco.logradouro}, {item.endereco.numero} -{' '}
+            {item.endereco.cidadeNome}/{item.endereco.estadoNome}
           </Text>
         </View>
       )}
@@ -102,7 +110,7 @@ export default function OngList() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#22C55E" />
-          <Text style={styles.loadingText}>Carregando ONGs...</Text>
+          <Text style={styles.loadingText}>Carregando instituições...</Text>
         </View>
       </SafeAreaView>
     );
@@ -127,7 +135,7 @@ export default function OngList() {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Ionicons name="business-outline" size={64} color="#6B7280" />
-          <Text style={styles.emptyText}>Nenhuma ONG encontrada</Text>
+          <Text style={styles.emptyText}>Nenhuma instituição encontrada</Text>
           <TouchableOpacity
             style={[styles.retryButton, { marginTop: 16 }]}
             onPress={loadOngs}
@@ -144,7 +152,7 @@ export default function OngList() {
       <FlatList
         data={ongs}
         renderItem={renderOngItem}
-        keyExtractor={(item: Ong) => item.id.toString()}
+        keyExtractor={(item: Instituicao) => item.idInstituicao.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
@@ -159,4 +167,3 @@ export default function OngList() {
     </SafeAreaView>
   );
 }
-
