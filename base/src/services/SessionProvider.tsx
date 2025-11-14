@@ -10,6 +10,15 @@ interface User {
   telefone?: string;
 }
 
+interface AuthResponse {
+  token: string | null;
+  tipo: string | null;
+  usuarioId: number;
+  email: string;
+  nome: string;
+  mensagem: string;
+}
+
 interface SessionContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -26,21 +35,21 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
     console.log("[SessionProvider][login] Iniciando login com:", email);
 
     try {
+      // ✅ payload compatível com AuthRequest (email + senha)
       const payload = {
-        username: email, 
-        password,
+        email,
+        senha: password,
       };
 
       console.log("[SessionProvider][login] Payload enviado:", payload);
 
-      const response = await apiClient.post("/auth/login", payload);
+      // ⚠️ Se o baseURL do apiClient já for "http://.../api",
+      // ENTÃO a rota correta é "/auth/login" (que vira /api/auth/login).
+      const response = await apiClient.post<AuthResponse>("/auth/login", payload);
 
       console.log("[SessionProvider][login] Resposta recebida:", response.data);
 
-      const { token, tokenType } = response.data as {
-        token: string | null;
-        tokenType: string;
-      };
+      const { token, tipo, usuarioId, nome, email: emailResposta } = response.data;
 
       if (!token) {
         console.log(
@@ -49,15 +58,23 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
 
+      // ✅ Salva token
       await AsyncStorage.setItem("token", token);
       console.log("[SessionProvider][login] Token salvo no AsyncStorage");
 
-      // Como o /auth/login não retorna dados do usuário,
-      // criamos um user mínimo aqui. Depois você pode buscar /usuarios/me.
+      // ✅ Salva também o id do usuário, caso precise depois
+      if (usuarioId != null) {
+        await AsyncStorage.setItem("userId", String(usuarioId));
+        console.log("[SessionProvider][login] userId salvo no AsyncStorage:", usuarioId);
+      } else {
+        console.warn("[SessionProvider][login] usuarioId veio nulo na resposta!");
+      }
+
+      // ✅ Seta o usuário real no contexto
       setUser({
-        idUsuario: 0,
-        nome: email,
-        email: email,
+        idUsuario: usuarioId ?? 0,
+        nome: nome || email,
+        email: emailResposta || email,
         telefone: undefined,
       });
 
@@ -74,7 +91,7 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
 
-      // Se for Network Error / timeout, repassamos para a tela de Login tratar
+      // Outros erros (network, 500, etc) sobem pra tela tratar
       throw error;
     }
   };
