@@ -92,7 +92,7 @@ export default function Doar() {
 
   const validarFormulario = (): boolean => {
     if (!user?.idUsuario) {
-      Alert.alert('Erro', 'Usuário não encontrado. Faça login novamente.');
+      Alert.alert('Atenção', 'Você não tem permissão para este registro. Faça login com usuário adequado.');
       return false;
     }
 
