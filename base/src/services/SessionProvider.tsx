@@ -27,7 +27,7 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
 
     try {
       const payload = {
-        username: email, // 👈 bate com o AuthRequest(username, password)
+        username: email, 
         password,
       };
 
