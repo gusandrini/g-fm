@@ -10,9 +10,9 @@ export default function Home() {
     Linking.openURL("https://hellplink-iot-dashboard.streamlit.app");
   };
 
-  // const goToProfile = () => {
-  //   navigation.navigate("Perfil"); 
-  // };
+  const goToProfile = () => {
+    navigation.navigate("Perfil" as never); 
+  };
 
   return (
     <View style={styles.screen}>
@@ -29,8 +29,8 @@ export default function Home() {
         </TouchableOpacity>
 
         {/* Botão Perfil */}
-        {/* onPress={goToProfile} */}
-        <TouchableOpacity style={[styles.button, styles.buttonSecondary]} >
+        
+        <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.navigate('Perfil' as never)}>
           <Ionicons name="person-circle-outline" size={22} color="#FFF" />
           <Text style={styles.buttonText}>Meu Perfil</Text>
         </TouchableOpacity>
