@@ -1,9 +1,11 @@
 import { Item } from './item';
 
+import type { DoacaoStatus } from './doacaoCreate';
+
 export interface Doacao {
   idDoacao: number;
-  status: string;
-  dtSolicitacao: string;           // ISO string da API
+  status: DoacaoStatus;
+  dtSolicitacao: string;
   dtConfirmacao?: string | null;
 
   usuarioId: number;
@@ -12,14 +14,6 @@ export interface Doacao {
   instituicaoId: number;
   instituicaoNome: string;
 
-  itens?: Item[] | null;           // usa o mesmo Item completo do modelo acima
-  impacto?: ImpactoDTO | null;
+  itens?: Item[] | null;
 }
 
-// =========== MODELOS COMPLEMENTARES =========== //
-
-export interface ImpactoDTO {
-  idImpacto: number;
-  descricao: string;
-  valorEstimado: number;
-}

@@ -29,15 +29,17 @@ import { styles } from '@/styles/screens/Doar';
 
 export default function Doar() {
   const navigation = useNavigation();
-  const { user } = useSession(); 
+  const { user } = useSession();
 
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
-  const [instituicaoSelecionada, setInstituicaoSelecionada] = useState<Instituicao | null>(null);
+  const [instituicaoSelecionada, setInstituicaoSelecionada] =
+    useState<Instituicao | null>(null);
 
   const [itens, setItens] = useState<Item[]>([]);
   const [itensSelecionados, setItensSelecionados] = useState<number[]>([]);
 
-  const [observacao, setObservacao] = useState(''); 
+  // Vai ser usada como descrição da doação (itemDescricao no backend)
+  const [observacao, setObservacao] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [loadingInstituicoes, setLoadingInstituicoes] = useState(true);
@@ -54,7 +56,10 @@ export default function Doar() {
       setInstituicoes(data);
     } catch (err) {
       console.error('Erro ao carregar instituições:', err);
-      Alert.alert('Erro', 'Não foi possível carregar a lista de instituições.');
+      Alert.alert(
+        'Erro',
+        'Não foi possível carregar a lista de instituições.'
+      );
     } finally {
       setLoadingInstituicoes(false);
     }
@@ -86,13 +91,18 @@ export default function Doar() {
 
   const toggleItemSelection = (idItem: number) => {
     setItensSelecionados((prev) =>
-      prev.includes(idItem) ? prev.filter((id) => id !== idItem) : [...prev, idItem]
+      prev.includes(idItem)
+        ? prev.filter((id) => id !== idItem)
+        : [...prev, idItem]
     );
   };
 
   const validarFormulario = (): boolean => {
     if (!user?.idUsuario) {
-      Alert.alert('Atenção', 'Você não tem permissão para este registro. Faça login com usuário adequado.');
+      Alert.alert(
+        'Atenção',
+        'Você não tem permissão para este registro. Faça login com usuário adequado.'
+      );
       return false;
     }
 
@@ -106,16 +116,30 @@ export default function Doar() {
       return false;
     }
 
+    if (!observacao.trim()) {
+      Alert.alert(
+        'Atenção',
+        'Informe uma descrição da doação (ex: tipo de itens, condições, combinações de entrega).'
+      );
+      return false;
+    }
+
     return true;
   };
 
   const handleDoar = async () => {
     if (!validarFormulario()) return;
 
+    const descricao = observacao.trim();
+
     const payload: CriarDoacao = {
       idInstituicao: instituicaoSelecionada!.idInstituicao,
       idItens: itensSelecionados,
+      itemDescricao: descricao, // mapeia observacao → itemDescricao
+      status: 'ABERTA', // status inicial da doação
     };
+
+    console.log('[Doar] Payload criarDoacao:', payload);
 
     try {
       setLoading(true);
@@ -135,12 +159,21 @@ export default function Doar() {
     } catch (err: any) {
       console.error('Erro ao registrar doação:', err);
       const errorMessage =
+        err?.response?.data?.mensagem ||
         err?.response?.data?.message ||
+        err?.response?.data?.erro ||
         err?.message ||
         'Erro ao registrar a doação. Tente novamente.';
 
       if (err?.response?.status === 401) {
         Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+      } else if (
+        err?.response?.status === 400 &&
+        err?.response?.data?.detalhes
+      ) {
+        const detalhes = err.response.data.detalhes;
+        const msg = Object.values(detalhes).join('\n');
+        Alert.alert('Erro de validação', msg as string);
       } else {
         Alert.alert('Erro', errorMessage);
       }
@@ -156,7 +189,10 @@ export default function Doar() {
         style={styles.container}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Seleção de Instituição */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Selecione uma instituição</Text>
@@ -165,7 +201,9 @@ export default function Doar() {
                 style={styles.ongCard}
                 onPress={() => setShowInstituicaoList(true)}
               >
-                <Text style={styles.ongName}>{instituicaoSelecionada.nome}</Text>
+                <Text style={styles.ongName}>
+                  {instituicaoSelecionada.nome}
+                </Text>
                 {instituicaoSelecionada.endereco && (
                   <Text style={styles.ongInfoText} numberOfLines={2}>
                     {instituicaoSelecionada.endereco.logradouro},{' '}
@@ -187,8 +225,14 @@ export default function Doar() {
                 style={styles.selectOngButton}
                 onPress={() => setShowInstituicaoList(true)}
               >
-                <Ionicons name="add-circle-outline" size={32} color="#22C55E" />
-                <Text style={styles.selectOngButtonText}>Selecionar instituição</Text>
+                <Ionicons
+                  name="add-circle-outline"
+                  size={32}
+                  color="#22C55E"
+                />
+                <Text style={styles.selectOngButtonText}>
+                  Selecionar instituição
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -215,7 +259,9 @@ export default function Doar() {
                   onPress={() => setShowItemList(true)}
                   style={{ marginTop: 8 }}
                 >
-                  <Text style={{ color: '#2563EB', fontSize: 14 }}>Editar itens</Text>
+                  <Text style={{ color: '#2563EB', fontSize: 14 }}>
+                    Editar itens
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -223,18 +269,24 @@ export default function Doar() {
                 style={styles.selectOngButton}
                 onPress={() => setShowItemList(true)}
               >
-                <Ionicons name="add-circle-outline" size={32} color="#22C55E" />
-                <Text style={styles.selectOngButtonText}>Selecionar itens</Text>
+                <Ionicons
+                  name="add-circle-outline"
+                  size={32}
+                  color="#22C55E"
+                />
+                <Text style={styles.selectOngButtonText}>
+                  Selecionar itens
+                </Text>
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Observação (opcional) – só front por enquanto */}
+          {/* Descrição da doação (antes era Observação opcional) */}
           <View style={styles.section}>
-            <Text style={styles.inputLabel}>Observação (Opcional)</Text>
+            <Text style={styles.inputLabel}>Descrição da doação</Text>
             <TextInput
               style={styles.observacaoInput}
-              placeholder="Ex: posso entregar aos finais de semana, tamanho G, etc."
+              placeholder="Ex: roupas de inverno tamanho G, posso entregar aos finais de semana, etc."
               placeholderTextColor="#6B7280"
               value={observacao}
               onChangeText={setObservacao}
@@ -284,10 +336,14 @@ export default function Doar() {
                 alignItems: 'center',
               }}
             >
-              <Text style={{ fontSize: 20, fontWeight: '600', color: '#0B1220' }}>
+              <Text
+                style={{ fontSize: 20, fontWeight: '600', color: '#0B1220' }}
+              >
                 Selecionar instituição
               </Text>
-              <TouchableOpacity onPress={() => setShowInstituicaoList(false)}>
+              <TouchableOpacity
+                onPress={() => setShowInstituicaoList(false)}
+              >
                 <Ionicons name="close" size={24} color="#0B1220" />
               </TouchableOpacity>
             </View>
@@ -296,7 +352,11 @@ export default function Doar() {
           <ScrollView style={{ flex: 1, padding: 16 }}>
             {loadingInstituicoes ? (
               <View
-                style={{ alignItems: 'center', justifyContent: 'center', padding: 32 }}
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 32,
+                }}
               >
                 <ActivityIndicator size="large" color="#22C55E" />
                 <Text style={{ marginTop: 12, color: '#6B7280' }}>
@@ -305,7 +365,9 @@ export default function Doar() {
               </View>
             ) : instituicoes.length === 0 ? (
               <View style={{ alignItems: 'center', padding: 32 }}>
-                <Text style={{ color: '#6B7280' }}>Nenhuma instituição disponível</Text>
+                <Text style={{ color: '#6B7280' }}>
+                  Nenhuma instituição disponível
+                </Text>
               </View>
             ) : (
               instituicoes.map((inst) => (
@@ -350,7 +412,9 @@ export default function Doar() {
                 alignItems: 'center',
               }}
             >
-              <Text style={{ fontSize: 20, fontWeight: '600', color: '#0B1220' }}>
+              <Text
+                style={{ fontSize: 20, fontWeight: '600', color: '#0B1220' }}
+              >
                 Selecionar itens
               </Text>
               <TouchableOpacity onPress={() => setShowItemList(false)}>
@@ -362,7 +426,11 @@ export default function Doar() {
           <ScrollView style={{ flex: 1, padding: 16 }}>
             {loadingItens ? (
               <View
-                style={{ alignItems: 'center', justifyContent: 'center', padding: 32 }}
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 32,
+                }}
               >
                 <ActivityIndicator size="large" color="#22C55E" />
                 <Text style={{ marginTop: 12, color: '#6B7280' }}>
@@ -381,7 +449,10 @@ export default function Doar() {
                     key={item.idItem}
                     style={[
                       styles.ongCard,
-                      selected && { borderColor: '#22C55E', borderWidth: 2 },
+                      selected && {
+                        borderColor: '#22C55E',
+                        borderWidth: 2,
+                      },
                     ]}
                     onPress={() => toggleItemSelection(item.idItem)}
                   >
@@ -395,7 +466,9 @@ export default function Doar() {
                       <View style={{ flex: 1, marginRight: 8 }}>
                         <Text style={styles.ongName}>{item.titulo}</Text>
                         {item.categoriaNome && (
-                          <Text style={styles.ongInfoText}>{item.categoriaNome}</Text>
+                          <Text style={styles.ongInfoText}>
+                            {item.categoriaNome}
+                          </Text>
                         )}
                         {item.estadoConservacao && (
                           <Text style={styles.ongInfoText}>
@@ -403,13 +476,20 @@ export default function Doar() {
                           </Text>
                         )}
                         {item.descricao && (
-                          <Text style={styles.ongInfoText} numberOfLines={2}>
+                          <Text
+                            style={styles.ongInfoText}
+                            numberOfLines={2}
+                          >
                             {item.descricao}
                           </Text>
                         )}
                       </View>
                       {selected && (
-                        <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={24}
+                          color="#22C55E"
+                        />
                       )}
                     </View>
                   </TouchableOpacity>

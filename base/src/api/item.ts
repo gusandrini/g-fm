@@ -1,11 +1,8 @@
 import apiClient from './apiClient';
-import { Item } from '@/models/item'; // seu model baseado no ItemDTO
+import { Item } from '@/models/item'; // model baseado no ItemDTO
 
-// Se seu apiClient JÁ tem baseURL com "/api", use:
-const BASE_PATH = '/itens';
-
-// Caso seu baseURL NÃO tenha "/api", troque para:
-// const BASE_PATH = '/api/itens';
+// baseURL = 'https://helplink-java.onrender.com'
+const BASE_PATH = '/api/itens';
 
 /**
  * GET /api/itens
@@ -26,21 +23,33 @@ export async function getItemById(id: number): Promise<Item> {
 }
 
 /**
- * POST /api/itens
- * Cria novo item
- * - O backend espera um ItemDTO completo (com categoriaId, usuarioId, etc.)
+ * POST /api/itens/{usuarioId}
+ * Cria novo item vinculado a um usuário
  */
-export async function criarItem(data: Partial<Item>): Promise<Item> {
-  const response = await apiClient.post<Item>(BASE_PATH, data);
+export async function criarItem(
+  usuarioId: number,
+  data: Partial<Item>
+): Promise<Item> {
+  const response = await apiClient.post<Item>(
+    `${BASE_PATH}/${usuarioId}`,
+    data
+  );
   return response.data;
 }
 
 /**
- * PUT /api/itens/{id}
+ * PUT /api/itens/{usuarioId}/{id}
  * Atualiza item existente
  */
-export async function atualizarItem(id: number, data: Partial<Item>): Promise<Item> {
-  const response = await apiClient.put<Item>(`${BASE_PATH}/${id}`, data);
+export async function atualizarItem(
+  usuarioId: number,
+  id: number,
+  data: Partial<Item>
+): Promise<Item> {
+  const response = await apiClient.put<Item>(
+    `${BASE_PATH}/${usuarioId}/${id}`,
+    data
+  );
   return response.data;
 }
 
