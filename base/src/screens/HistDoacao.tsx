@@ -18,13 +18,23 @@ import { styles } from '@/styles/screens/HistDoacao';
 import { useSession } from '@/services/SessionProvider';
 
 export default function HistDoacao() {
-  const { user } = useSession();
+  const { user, isAuthenticated } = useSession() as any; // ⬅ peguei isAuthenticated também
   const [doacoes, setDoacoes] = useState<Doacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadDoacoes = useCallback(async () => {
+    // ✅ 1) Se não estiver autenticado, não chama a API
+    if (!isAuthenticated) {
+      console.log('[HistDoacao] Usuário deslogado – não buscar doações');
+      setDoacoes([]);
+      setError(null);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     try {
       setError(null);
 
@@ -34,15 +44,23 @@ export default function HistDoacao() {
 
       console.log('[HistDoacao] Doações recebidas (brutas):', data);
 
-      // Se tiver usuário logado, filtra por usuarioId
       const filtradas = user?.idUsuario
-        ? data.filter((d) => d.usuarioId === user.idUsuario)
+        ? data.filter((d: Doacao) => d.usuarioId === user.idUsuario)
         : data;
 
       console.log('[HistDoacao] Doações após filtro:', filtradas);
 
       setDoacoes(filtradas);
     } catch (err: any) {
+      // ✅ 2) Se for 401 e usuário não estiver autenticado, ignora silenciosamente
+      if (axios.isAxiosError(err) && err.response?.status === 401 && !isAuthenticated) {
+        console.log(
+          '[HistDoacao] 401 recebido com usuário já deslogado – ignorando (sem erro na tela)'
+        );
+        // não seta erro, não faz console.error
+        return;
+      }
+
       console.error('[HistDoacao] Erro ao carregar doações:', err);
 
       let errorMessage =
@@ -54,10 +72,10 @@ export default function HistDoacao() {
 
       if (axios.isAxiosError(err)) {
         if (!err.response) {
-          // Network Error / Timeout
           errorMessage =
             'Não foi possível conectar ao servidor. Verifique sua internet ou se a API está no ar.';
         } else if (err.response.status === 401) {
+          // Aqui só cai se ainda estiver autenticado (caso sessão expirada de verdade)
           errorMessage = 'Sessão expirada. Faça login novamente.';
           Alert.alert('Erro', errorMessage);
         } else if (err.response.status === 500) {
@@ -71,7 +89,7 @@ export default function HistDoacao() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.idUsuario]);
+  }, [isAuthenticated, user?.idUsuario]);
 
   useEffect(() => {
     loadDoacoes();
@@ -113,7 +131,6 @@ export default function HistDoacao() {
         text: styles.statusTextCancelado,
       };
     }
-    // ABERTA ou qualquer outro → pendente
     return {
       container: styles.statusPendente,
       text: styles.statusTextPendente,
@@ -211,6 +228,13 @@ export default function HistDoacao() {
           <Text style={[styles.emptyText, { marginTop: 8, fontSize: 14 }]}>
             Suas doações aparecerão aqui
           </Text>
+
+          <TouchableOpacity
+            style={[styles.retryButton, { marginTop: 16 }]}
+            onPress={handleRefresh}
+          >
+            <Text style={styles.retryButtonText}>Recarregar</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -218,6 +242,50 @@ export default function HistDoacao() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '600',
+            color: '#111827',
+          }}
+        >
+          Histórico de Doações
+        </Text>
+
+        <TouchableOpacity
+          onPress={handleRefresh}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: '#22C55E',
+          }}
+        >
+          <Ionicons name="refresh" size={18} color="#22C55E" />
+          <Text
+            style={{
+              marginLeft: 6,
+              color: '#22C55E',
+              fontWeight: '500',
+            }}
+          >
+            Recarregar
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={doacoes}
         renderItem={renderDoacaoItem}
