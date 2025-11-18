@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
 
 import { Doacao } from '@/models/doacao';
 import { getDoacoes } from '@/api/doacao';
@@ -23,41 +24,58 @@ export default function HistDoacao() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadDoacoes = async () => {
+  const loadDoacoes = useCallback(async () => {
     try {
       setError(null);
 
-      // Busca todas as doações
+      console.log('[HistDoacao] Buscando doações...');
+
       const data = await getDoacoes();
+
+      console.log('[HistDoacao] Doações recebidas (brutas):', data);
 
       // Se tiver usuário logado, filtra por usuarioId
       const filtradas = user?.idUsuario
         ? data.filter((d) => d.usuarioId === user.idUsuario)
         : data;
 
+      console.log('[HistDoacao] Doações após filtro:', filtradas);
+
       setDoacoes(filtradas);
     } catch (err: any) {
-      console.error('Erro ao carregar doações:', err);
-      const errorMessage =
+      console.error('[HistDoacao] Erro ao carregar doações:', err);
+
+      let errorMessage =
+        err?.response?.data?.mensagem ||
         err?.response?.data?.message ||
+        err?.response?.data?.erro ||
         err?.message ||
         'Erro ao carregar histórico de doações. Verifique sua conexão.';
-      setError(errorMessage);
 
-      if (err?.response?.status === 401) {
-        Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+      if (axios.isAxiosError(err)) {
+        if (!err.response) {
+          // Network Error / Timeout
+          errorMessage =
+            'Não foi possível conectar ao servidor. Verifique sua internet ou se a API está no ar.';
+        } else if (err.response.status === 401) {
+          errorMessage = 'Sessão expirada. Faça login novamente.';
+          Alert.alert('Erro', errorMessage);
+        } else if (err.response.status === 500) {
+          errorMessage =
+            'Erro interno no servidor. Tente novamente mais tarde.';
+        }
       }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user?.idUsuario]);
 
   useEffect(() => {
     loadDoacoes();
-    // se quiser recarregar automaticamente quando o usuário mudar:
-    // }, [user]);
-  }, []);
+  }, [loadDoacoes]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -84,13 +102,22 @@ export default function HistDoacao() {
     const base = status?.toUpperCase() || 'ABERTA';
 
     if (base === 'CONCLUIDA') {
-      return { container: styles.statusAprovado, text: styles.statusTextAprovado };
+      return {
+        container: styles.statusAprovado,
+        text: styles.statusTextAprovado,
+      };
     }
     if (base === 'CANCELADA') {
-      return { container: styles.statusCancelado, text: styles.statusTextCancelado };
+      return {
+        container: styles.statusCancelado,
+        text: styles.statusTextCancelado,
+      };
     }
     // ABERTA ou qualquer outro → pendente
-    return { container: styles.statusPendente, text: styles.statusTextPendente };
+    return {
+      container: styles.statusPendente,
+      text: styles.statusTextPendente,
+    };
   };
 
   const getStatusLabel = (status?: string) => {
