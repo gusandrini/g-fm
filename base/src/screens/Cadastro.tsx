@@ -16,8 +16,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { styles } from '../styles/screens/Cadastro';
 
-import { criarUsuario } from '@/api/usuario';
 import { UsuarioCreate } from '@/models/usuario';
+import { registrarUsuario } from '@/api/auth';
 
 const COLORS = {
   primary: '#22C55E',
@@ -59,12 +59,17 @@ export default function CadastroUsuario({ navigation }: any) {
       nome: nomeTrim,
       email: emailTrim,
       senha: senhaTrim,
-      telefone: telefoneTrim || undefined,
+      telefone: telefoneTrim || null, // opcional
+      idEndereco: null,               // por enquanto sem seleção de endereço
     };
+
+    console.log('[CadastroUsuario] Payload enviado:', payload);
 
     try {
       setLoading(true);
-      await criarUsuario(payload);
+
+      const usuarioCriado = await registrarUsuario(payload);
+      console.log('[CadastroUsuario] Usuário criado:', usuarioCriado);
 
       Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!', [
         { text: 'OK', onPress: () => navigation.replace('Login') },
@@ -75,20 +80,29 @@ export default function CadastroUsuario({ navigation }: any) {
       setSenha('');
       setTelefone('');
     } catch (error: any) {
+      console.log(
+        '[CadastroUsuario][ERRO]',
+        error?.response?.status,
+        error?.response?.data || error?.message
+      );
+
       if (error?.response) {
-        if (error.response.status === 401) {
-          Alert.alert(
-            'Não autorizado',
-            'Você não tem permissão para realizar esta ação.'
-          );
-        } else if (error.response.status === 403) {
-          Alert.alert('Acesso negado', 'Acesso proibido para este usuário.');
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 400 && data?.detalhes) {
+          // Erros de validação do backend (nome/email/senha obrigatórios etc.)
+          const detalhes = data.detalhes;
+          const mensagens = Object.values(detalhes).join('\n');
+          Alert.alert('Erro de validação', mensagens as string);
         } else {
           const msg =
-            error.response.data?.message ||
-            error.response.data?.error ||
+            data?.mensagem ||
+            data?.message ||
+            data?.error ||
+            data?.erro ||
             'Erro desconhecido no servidor.';
-          Alert.alert(`Erro ${error.response.status}`, msg);
+          Alert.alert(`Erro ${status}`, msg);
         }
       } else {
         Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
@@ -101,7 +115,12 @@ export default function CadastroUsuario({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Overlay de carregamento geral */}
-      <Modal transparent visible={loading} animationType="fade" statusBarTranslucent>
+      <Modal
+        transparent
+        visible={loading}
+        animationType="fade"
+        statusBarTranslucent
+      >
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Cadastrando...</Text>
@@ -174,7 +193,11 @@ export default function CadastroUsuario({ navigation }: any) {
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="save-outline" size={20} color={COLORS.primaryText} />
+            <Ionicons
+              name="save-outline"
+              size={20}
+              color={COLORS.primaryText}
+            />
             <Text style={styles.buttonText}>Cadastrar Usuário</Text>
           </TouchableOpacity>
         </ScrollView>

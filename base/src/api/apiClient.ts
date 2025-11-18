@@ -1,10 +1,8 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// ⚠️ AJUSTE AQUI CONFORME ONDE A API ESTÁ RODANDO:
-// - Emulador Android: "http://10.0.2.2:8080/api"
-// - Celular físico (Expo Go): "http://SEU_IP_LOCAL:8080/api"
-const API_BASE_URL = "http://172.17.100.211:8080/api";
+
+const API_BASE_URL = "https://helplink-java.onrender.com";
 
 console.log("[apiClient] Inicializando com baseURL:", API_BASE_URL);
 

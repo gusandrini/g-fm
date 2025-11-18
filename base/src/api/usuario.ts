@@ -1,14 +1,13 @@
+// src/api/usuario.ts
+
 import apiClient from './apiClient';
 import { Usuario, UsuarioCreate } from '@/models/usuario';
 
-// Se o baseURL já tiver "/api", usa:
-const BASE_PATH = '/usuarios';
-
-// Se NÃO tiver "/api" no baseURL, troca para:
-// const BASE_PATH = '/api/usuarios';
+const BASE_PATH = '/api/usuarios';
 
 /**
  * GET /api/usuarios
+ * (precisa de token JWT)
  */
 export async function getUsuarios(): Promise<Usuario[]> {
   const response = await apiClient.get<Usuario[]>(BASE_PATH);
@@ -25,6 +24,8 @@ export async function getUsuarioById(id: number): Promise<Usuario> {
 
 /**
  * POST /api/usuarios
+ * → normalmente protegido (JWT), usado para CRUD interno
+ * → MAS no seu caso, a gente vai usar rota de auth pública para cadastro
  */
 export async function criarUsuario(data: UsuarioCreate): Promise<Usuario> {
   const response = await apiClient.post<Usuario>(BASE_PATH, data);
@@ -33,7 +34,6 @@ export async function criarUsuario(data: UsuarioCreate): Promise<Usuario> {
 
 /**
  * PUT /api/usuarios/{id}
- * Usa o mesmo payload do create (UsuarioCreateDTO)
  */
 export async function atualizarUsuario(
   id: number,

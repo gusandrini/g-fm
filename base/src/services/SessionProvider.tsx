@@ -35,7 +35,6 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
     console.log("[SessionProvider][login] Iniciando login com:", email);
 
     try {
-      // ✅ payload compatível com AuthRequest (email + senha)
       const payload = {
         email,
         senha: password,
@@ -43,13 +42,17 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
 
       console.log("[SessionProvider][login] Payload enviado:", payload);
 
-      // ⚠️ Se o baseURL do apiClient já for "http://.../api",
-      // ENTÃO a rota correta é "/auth/login" (que vira /api/auth/login).
-      const response = await apiClient.post<AuthResponse>("/auth/login", payload);
+      const response = await apiClient.post<AuthResponse>("/api/auth/login", payload);
 
       console.log("[SessionProvider][login] Resposta recebida:", response.data);
 
-      const { token, tipo, usuarioId, nome, email: emailResposta } = response.data;
+      const {
+        token,
+        tipo,
+        usuarioId,
+        nome,
+        email: emailResposta,
+      } = response.data;
 
       if (!token) {
         console.log(
@@ -58,11 +61,14 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
 
-      // ✅ Salva token
+      // Salva token
       await AsyncStorage.setItem("token", token);
       console.log("[SessionProvider][login] Token salvo no AsyncStorage");
 
-      // ✅ Salva também o id do usuário, caso precise depois
+      // Configura Authorization para os próximos requests
+      apiClient.defaults.headers.common["Authorization"] = `${tipo ?? "Bearer"} ${token}`;
+
+      // Salva o id do usuário
       if (usuarioId != null) {
         await AsyncStorage.setItem("userId", String(usuarioId));
         console.log("[SessionProvider][login] userId salvo no AsyncStorage:", usuarioId);
@@ -70,10 +76,10 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
         console.warn("[SessionProvider][login] usuarioId veio nulo na resposta!");
       }
 
-      // ✅ Seta o usuário real no contexto
+      // Seta o usuário no contexto
       setUser({
         idUsuario: usuarioId ?? 0,
-        nome: nome || email,
+        nome: nome || emailResposta || email,
         email: emailResposta || email,
         telefone: undefined,
       });
@@ -85,13 +91,10 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
       console.error("[SessionProvider][login][ERRO]:", error);
 
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        console.log(
-          "[SessionProvider][login] 401 recebido - credenciais inválidas"
-        );
+        console.log("[SessionProvider][login] 401 recebido - credenciais inválidas");
         return false;
       }
 
-      // Outros erros (network, 500, etc) sobem pra tela tratar
       throw error;
     }
   };
@@ -100,6 +103,7 @@ const SessionProvider = ({ children }: PropsWithChildren) => {
     console.log("[SessionProvider][logout] Limpando sessão");
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("userId");
+    delete apiClient.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
